@@ -44,7 +44,8 @@ class UdpServer
     # Increment the slice count for the file and append the text to text length
     file_details[:slices_in] += 1
     file_details[:encrypted_text] += chunk["slice"]
-
+    puts "Received #{file_details[:slices_in]}"
+    
     # If file is fully received, decrypt it
     if file_fully_received?(file_details)
       # Check if it is a file on a JSON
