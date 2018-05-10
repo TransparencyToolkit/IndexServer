@@ -1,3 +1,5 @@
+require "socket"
+
 # Small server for receiving UDP data and sending it to DocManager
 class UdpServer
   include DocIntegrityCheck
