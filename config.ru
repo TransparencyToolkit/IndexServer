@@ -3,9 +3,10 @@ require "json"
 require "doc_integrity_check"
 require "socket"
 require "curb"
-load "udp_server.rb"
+require "sinatra"
+load "index_server.rb"
 
-# Load all files
-#Dir.glob('*.rb').each { |file| require file }
+# Set docmanager url
+ENV["DOCMANAGER_URL"] = "http://localhost:3000"
 
-run UdpServer
+run IndexServer
