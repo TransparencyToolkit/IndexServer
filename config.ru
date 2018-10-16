@@ -7,6 +7,6 @@ require "sinatra"
 load "index_server.rb"
 
 # Set docmanager url
-ENV["DOCMANAGER_URL"] = "http://localhost:3000"
+ENV["DOCMANAGER_URL"] = "http://localhost:3000" if ENV["DOCMANAGER_URL"] == nil
 
 run IndexServer
