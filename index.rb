@@ -45,10 +45,15 @@ class Index
 
   # Index the document
   def index_doc(doc, index_name, item_type)
-    c = Curl::Easy.new("#{ENV['DOCMANAGER_URL']}/add_items")
-    c.http_post(Curl::PostField.content("item_type", item_type),
-                Curl::PostField.content("index_name", index_name),
-                Curl::PostField.content("items", JSON.pretty_generate([doc])))
+    begin
+      c = Curl::Easy.new("#{ENV['DOCMANAGER_URL']}/add_items")
+      c.http_post(Curl::PostField.content("item_type", item_type),
+                  Curl::PostField.content("index_name", index_name),
+                  Curl::PostField.content("items", JSON.pretty_generate([doc])))
+    rescue # Wait and retry if error
+      sleep(5)
+      index_doc(doc, index_name, item_type)
+    end
   end
 end
 
