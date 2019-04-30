@@ -10,6 +10,9 @@ class Index
   
   # Listen for new files from OCR
   def listen_for_files
+    # First process existing
+    index_files(Dir.glob("#{@out_dir}/ocred_docs/**/*").select{|f| File.file?(f)})
+    
     # Index if there are new files
     listener = Listen.to("#{@out_dir}/ocred_docs/") do |_, new, _|
       index_files(new) if new
@@ -42,6 +45,9 @@ class Index
         puts "Indexing #{file}"
         index_doc(doc, index_name, item_type)
       end
+
+      # Move and create file
+      FileUtils.mkdir_p("#{@out_dir}/already_indexed_json")
       FileUtils.mv(file, "#{@out_dir}/already_indexed_json")
     end
   end
