@@ -7,17 +7,22 @@ class Index
   def initialize(out_dir)
     @out_dir = out_dir
   end
+
+  # List the files in the directory
+  def list_files_in_dir
+    return Dir.glob("#{@out_dir}/ocred_docs/**/*").select{|f| File.file?(f)}
+  end
   
   # Listen for new files from OCR
   def listen_for_files
-    # First process existing
-    index_files(Dir.glob("#{@out_dir}/ocred_docs/**/*").select{|f| File.file?(f)})
-    
     # Index if there are new files
     listener = Listen.to("#{@out_dir}/ocred_docs/") do |_, new, _|
       index_files(new) if new
     end
     listener.start
+
+    # Process existing
+    index_files(list_files_in_dir)
 
     # Keep listening
     loop do
