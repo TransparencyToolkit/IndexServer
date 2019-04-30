@@ -27,11 +27,21 @@ class Index
     files.each do |file|
       # Parse the document and extract the fields with index info
       doc = JSON.parse(File.read(file))
-      index_name, item_type = set_index_fields(doc)
+      if doc.is_a?(Array)
+        doc.each do |d|
+          index_name, item_type = set_index_fields(d)
 
-      # Index the file and move it to indexed directory
-      puts "Indexing #{file}"
-      index_doc(doc, index_name, item_type)
+          # Index the file and move it to indexed directory
+          puts "Indexing #{file}"
+          index_doc(d, index_name, item_type)
+        end
+      else
+        index_name, item_type = set_index_fields(doc)
+        
+        # Index the file and move it to indexed directory
+        puts "Indexing #{file}"
+        index_doc(doc, index_name, item_type)
+      end
       FileUtils.mv(file, "#{@out_dir}/already_indexed_json")
     end
   end
