@@ -12,21 +12,36 @@ class Index
   def list_files_in_dir
     return Dir.glob("#{@out_dir}/ocred_docs/**/*").select{|f| File.file?(f)}
   end
-  
+
   # Listen for new files from OCR
   def listen_for_files
-    # Index if there are new files
-    listener = Listen.to("#{@out_dir}/ocred_docs/") do |_, new, _|
-      index_files(new) if new
+    # inotify doesn't currently register events on 9p filesystems
+    # check the device type and compare against 9p' major device number 0
+    inotify_works = 0 != File.stat("#{@out_dir}/ocred_docs/").dev_major
+
+    if inotify_works
+      # Index if there are new files
+      listener = Listen.to(ocred_docs_path) do |_, new, _|
+        index_files(new) if new
+      end
+      listener.start
     end
-    listener.start
 
     # Process existing
     index_files(list_files_in_dir)
 
     # Keep listening
+    processed = Set.new()
     loop do
-      sleep(0.5)
+      if not inotify_works
+        # fallback to repeatedly globbing for the 9p case:
+        all_files = Set.new(list_files_in_dir)
+        new_files = all_files - processed
+        # Index if there are new files
+        index_files(new_files)
+        processed.add(new_files)
+      end
+      sleep(2)
     end
   end
 
