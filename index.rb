@@ -1,7 +1,8 @@
 require "pry"
 require "json"
 require "curb"
-require "listen"
+require "rb-inotify"
+require "set"
 
 class Index
   def initialize(out_dir)
@@ -21,10 +22,12 @@ class Index
 
     if inotify_works
       # Index if there are new files
-      listener = Listen.to('#{@out_dir}/ocred_docs/') do |_, new, _|
-        index_files(new) if new
+      listener = INotify::Notifier.new
+      listener.watch("#{@out_dir}/ocred_docs/", :moved_to, :close_write) do |event|
+        if not event.name.empty?
+          index_files(event.absolute_name)
+        end
       end
-      listener.start
     end
 
     # Process existing
@@ -33,7 +36,9 @@ class Index
     # Keep listening
     processed = Set.new()
     loop do
-      if not inotify_works
+      if inotify_works
+        listener.process
+      elsif not inotify_works
         # fallback to repeatedly globbing for the 9p case:
         all_files = Set.new(list_files_in_dir)
         new_files = all_files - processed
