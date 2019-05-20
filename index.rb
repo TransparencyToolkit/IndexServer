@@ -21,7 +21,7 @@ class Index
 
     if inotify_works
       # Index if there are new files
-      listener = Listen.to(ocred_docs_path) do |_, new, _|
+      listener = Listen.to('#{@out_dir}/ocred_docs/') do |_, new, _|
         index_files(new) if new
       end
       listener.start
