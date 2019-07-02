@@ -25,7 +25,7 @@ class Index
       listener = INotify::Notifier.new
       listener.watch("#{@out_dir}/ocred_docs/", :moved_to, :close_write) do |event|
         if not event.name.empty?
-          index_files(event.absolute_name)
+          index_files([event.absolute_name])
         end
       end
     end
