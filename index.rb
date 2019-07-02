@@ -18,7 +18,9 @@ class Index
   def listen_for_files
     # inotify doesn't currently register events on 9p filesystems
     # check the device type and compare against 9p' major device number 0
-    inotify_works = 0 != File.stat("#{@out_dir}/ocred_docs/").dev_major
+    #inotify_works = 0 != File.stat("#{@out_dir}/ocred_docs/").dev_major
+    # ^-- commented out because of problems with rsync+inotify
+    inotify_works = 0 == 1
 
     if inotify_works
       # Index if there are new files
@@ -53,6 +55,10 @@ class Index
   # Loop through and index all files
   def index_files(files)
     files.each do |file|
+
+      next if File.basename(file).start_with? "." # skip rsync temporary files
+      next if not File.file? file
+
       # Parse the document and extract the fields with index info
       doc = JSON.parse(File.read(file))
       if doc.is_a?(Array)
